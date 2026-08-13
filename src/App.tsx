@@ -54,6 +54,11 @@ export function App() {
     setActiveTab('editor');
   };
 
+  // 로고 클릭 시 새로고침 핸들러
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
   return (
     <MobileFrame>
       <div className="min-h-screen bg-[#0A0A0A] text-white pb-32">
@@ -62,7 +67,13 @@ export function App() {
           style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 3.5rem)' }}
           className="sticky top-0 z-40 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-gray-800/60 px-5 pb-4 flex items-center justify-between"
         >
-          <div className="flex items-center gap-2">
+          {/* Campic 로고 버튼 (클릭 시 페이지 리프레시) */}
+          <button
+            type="button"
+            onClick={handleRefresh}
+            className="flex items-center gap-2 text-left cursor-pointer active:scale-95 transition-transform"
+            title="새로고침"
+          >
             <span className="p-2 bg-gradient-to-tr from-orange-500 to-amber-500 rounded-xl shadow-lg shadow-orange-500/20">
               <Tent size={20} className="text-white" />
             </span>
@@ -74,7 +85,7 @@ export function App() {
                 Camping Log & Gear
               </p>
             </div>
-          </div>
+          </button>
 
           <button
             type="button"
