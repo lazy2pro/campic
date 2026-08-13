@@ -9,7 +9,7 @@ import { GearCloset } from './components/GearCloset';
 
 import { CampingLog, GearItem } from './types/camping';
 import { INITIAL_CAMPING_LOGS, INITIAL_GEAR_ITEMS } from './data/mockData';
-import { Flame, Plus, Compass, Package, Search, Image as ImageIcon } from 'lucide-react';
+import { Flame, Plus, Compass, Package, Search, Image as ImageIcon, Sparkles } from 'lucide-react';
 
 export const App: React.FC = () => {
   // Navigation Tabs
@@ -17,12 +17,12 @@ export const App: React.FC = () => {
 
   // Logs and Gear State with localStorage
   const [logs, setLogs] = useState<CampingLog[]>(() => {
-    const saved = localStorage.getItem('camplog_logs');
+    const saved = localStorage.getItem('campic_logs');
     return saved ? JSON.parse(saved) : INITIAL_CAMPING_LOGS;
   });
 
   const [gearList, setGearList] = useState<GearItem[]>(() => {
-    const saved = localStorage.getItem('camplog_gear');
+    const saved = localStorage.getItem('campic_gear');
     return saved ? JSON.parse(saved) : INITIAL_GEAR_ITEMS;
   });
 
@@ -37,11 +37,11 @@ export const App: React.FC = () => {
 
   // Sync to localStorage
   useEffect(() => {
-    localStorage.setItem('camplog_logs', JSON.stringify(logs));
+    localStorage.setItem('campic_logs', JSON.stringify(logs));
   }, [logs]);
 
   useEffect(() => {
-    localStorage.setItem('camplog_gear', JSON.stringify(gearList));
+    localStorage.setItem('campic_gear', JSON.stringify(gearList));
   }, [gearList]);
 
   // Handlers
@@ -86,37 +86,34 @@ export const App: React.FC = () => {
       <div className="flex-1 flex flex-col justify-between h-full bg-charcoal-950 text-slate-100">
         
         {/* App Top Navigation Header */}
-        <div className="sticky top-0 z-30 bg-charcoal-950/85 backdrop-blur-md px-4 py-3 border-b border-white/10 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-campfire-600 to-campfire-400 flex items-center justify-center shadow-glow-orange">
+        <div className="sticky top-0 z-30 bg-charcoal-950/90 backdrop-blur-md px-4 py-3.5 border-b border-white/10 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-campfire-600 to-campfire-400 flex items-center justify-center shadow-glow-orange">
               <Flame className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="font-extrabold text-base tracking-tight text-white flex items-center gap-1.5">
+              <h1 className="font-extrabold text-lg tracking-tight text-white flex items-center gap-1.5">
                 <span>Campic</span>
-                <span className="text-[10px] bg-campfire-500/20 text-campfire-400 font-mono px-1.5 py-0.5 rounded border border-campfire-500/30">
-                  v1.0
-                </span>
               </h1>
-              <p className="text-[10px] text-slate-400">캠핑 사진 로그 & 원본/스탬프 아이폰 저장</p>
+              <p className="text-[11px] text-slate-400">캠핑 사진 로그 & 사진첩 저장</p>
             </div>
           </div>
 
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="px-3 py-1.5 bg-campfire-500 hover:bg-campfire-600 font-bold text-xs rounded-xl text-white shadow-glow-orange flex items-center gap-1.5 transition-all active:scale-95"
+            className="px-3.5 py-2 bg-campfire-500 hover:bg-campfire-600 font-bold text-xs rounded-xl text-white shadow-glow-orange flex items-center gap-1.5 transition-all active:scale-95"
           >
             <Plus className="w-4 h-4" />
-            <span>로그 남기기</span>
+            <span>로그 작성</span>
           </button>
         </div>
 
         {/* Dynamic Tab Body Content */}
-        <div className="flex-1 overflow-y-auto pb-20">
+        <div className="flex-1 overflow-y-auto pb-24">
           
           {/* TAB 1: Photo Log Feed */}
           {activeTab === 'feed' && (
-            <div className="p-3 sm:p-4 flex flex-col gap-4">
+            <div className="p-4 flex flex-col gap-4">
               
               {/* Search Bar & Category Pills */}
               <div className="flex flex-col gap-2.5">
@@ -127,7 +124,7 @@ export const App: React.FC = () => {
                     placeholder="캠핑장, 불멍, 장비 이름 검색..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-charcoal-900 border border-white/10 rounded-2xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-campfire-500"
+                    className="w-full pl-9 pr-4 py-2.5 bg-charcoal-900 border border-white/10 rounded-2xl text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-campfire-500"
                   />
                 </div>
 
@@ -162,10 +159,22 @@ export const App: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <div className="py-16 text-center text-slate-400 flex flex-col items-center justify-center">
-                  <ImageIcon className="w-10 h-10 text-slate-600 mb-2" />
-                  <p className="text-sm font-semibold">검색 조건에 해당되는 캠핑 로그가 없습니다.</p>
-                  <p className="text-xs text-slate-500 mt-1">상단의 '+ 로그 남기기'를 눌러 새 사진을 등록해 보세요!</p>
+                /* Clean Empty State View */
+                <div className="py-20 px-4 text-center text-slate-400 flex flex-col items-center justify-center bg-charcoal-900/60 rounded-3xl border border-white/5 mt-2">
+                  <div className="w-16 h-16 rounded-full bg-campfire-500/10 border border-campfire-500/20 text-campfire-400 flex items-center justify-center mb-3">
+                    <Flame className="w-8 h-8 animate-pulse" />
+                  </div>
+                  <h3 className="text-base font-bold text-slate-200">아직 작성된 캠핑 로그가 없습니다</h3>
+                  <p className="text-xs text-slate-400 mt-1 max-w-xs leading-relaxed">
+                    멋진 불멍 사진, 텐트 야경, 캠핑장 장비 사진을 업로드하고 날씨/위치 스탬프를 입혀 사진첩에 남겨보세요!
+                  </p>
+                  <button
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="mt-5 px-5 py-2.5 bg-campfire-500 hover:bg-campfire-600 font-bold text-xs rounded-2xl text-white shadow-glow-orange flex items-center gap-2 transition-all active:scale-95"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    <span>첫 캠핑 사진 로그 작성하기</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -180,8 +189,8 @@ export const App: React.FC = () => {
           )}
         </div>
 
-        {/* iOS Glass Bottom Navigation Bar */}
-        <nav className="fixed bottom-0 left-0 right-0 max-w-[420px] mx-auto glass-nav py-2 px-6 flex justify-around items-center z-40">
+        {/* Floating Bottom Navigation Bar */}
+        <nav className="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto glass-nav py-2.5 px-6 flex justify-around items-center z-40">
           <button
             onClick={() => setActiveTab('feed')}
             className={`flex flex-col items-center gap-1 transition-all ${
@@ -194,7 +203,7 @@ export const App: React.FC = () => {
 
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="w-11 h-11 -mt-4 rounded-full bg-gradient-to-tr from-campfire-600 to-campfire-500 text-white flex items-center justify-center shadow-glow-orange hover:scale-110 active:scale-95 transition-all"
+            className="w-12 h-12 -mt-5 rounded-full bg-gradient-to-tr from-campfire-600 to-campfire-500 text-white flex items-center justify-center shadow-glow-orange hover:scale-110 active:scale-95 transition-all"
           >
             <Plus className="w-6 h-6" />
           </button>
