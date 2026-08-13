@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Tent, Compass, Camera, Package } from 'lucide-react';
 import { CampingLog, GearItem } from './types/camping';
-import { initialLogs, initialGears } from './data/mockData';
 import { LogCard } from './components/LogCard';
 import { LogDetailModal } from './components/LogDetailModal';
 import { AddLogModal } from './components/AddLogModal';
@@ -9,44 +8,69 @@ import { CampingMapStats } from './components/CampingMapStats';
 import { PhotoStampEditor } from './components/PhotoStampEditor';
 import { GearCloset } from './components/GearCloset';
 import { MobileFrame } from './components/MobileFrame';
+import { fetchLogsFromKV, saveLogsToKV, fetchGearsFromKV, saveGearsToKV } from './services/storage';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<'logs' | 'map' | 'editor' | 'gear'>('logs');
-  const [logs, setLogs] = useState<CampingLog[]>(initialLogs);
-  const [gears, setGears] = useState<GearItem[]>(initialGears);
+  const [logs, setLogs] = useState<CampingLog[]>([]);
+  const [gears, setGears] = useState<GearItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   const [selectedLog, setSelectedLog] = useState<CampingLog | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // 캠핑 로그 추가
-  const handleAddLog = (newLogData: Omit<CampingLog, 'id'>) => {
+  // 초기 데이터 로드 (Upstash KV)
+  useEffect(() => {
+    const loadInitialData = async () => {
+      setIsLoading(true);
+      const [storedLogs, storedGears] = await Promise.all([
+        fetchLogsFromKV(),
+        fetchGearsFromKV()
+      ]);
+      setLogs(storedLogs);
+      setGears(storedGears);
+      setIsLoading(false);
+    };
+    loadInitialData();
+  }, []);
+
+  // 로그 추가
+  const handleAddLog = async (newLogData: Omit<CampingLog, 'id'>) => {
     const newLog: CampingLog = {
       ...newLogData,
       id: `log-${Date.now()}`
     };
-    setLogs((prevLogs) => [newLog, ...prevLogs]);
+    const updatedLogs = [newLog, ...logs];
+    setLogs(updatedLogs);
+    await saveLogsToKV(updatedLogs);
   };
 
-  // 캠핑 로그 삭제
-  const handleDeleteLog = (id: string) => {
-    setLogs((prevLogs) => prevLogs.filter((log) => log.id !== id));
+  // 로그 삭제
+  const handleDeleteLog = async (id: string) => {
+    const updatedLogs = logs.filter((log) => log.id !== id);
+    setLogs(updatedLogs);
     if (selectedLog?.id === id) {
       setSelectedLog(null);
     }
+    await saveLogsToKV(updatedLogs);
   };
 
   // 장비 추가
-  const handleAddGear = (newGear: Omit<GearItem, 'id'>) => {
+  const handleAddGear = async (newGear: Omit<GearItem, 'id'>) => {
     const gear: GearItem = {
       ...newGear,
       id: `gear-${Date.now()}`
     };
-    setGears((prev) => [gear, ...prev]);
+    const updatedGears = [...gears, gear];
+    setGears(updatedGears);
+    await saveGearsToKV(updatedGears);
   };
 
   // 장비 삭제
-  const handleDeleteGear = (id: string) => {
-    setGears((prevGears) => prevGears.filter((gear) => gear.id !== id));
+  const handleDeleteGear = async (id: string) => {
+    const updatedGears = gears.filter((gear) => gear.id !== id);
+    setGears(updatedGears);
+    await saveGearsToKV(updatedGears);
   };
 
   const handleOpenStampStudioFromDetail = () => {
@@ -54,7 +78,6 @@ export function App() {
     setActiveTab('editor');
   };
 
-  // 로고 클릭 시 새로고침 핸들러
   const handleRefresh = () => {
     window.location.reload();
   };
@@ -62,12 +85,11 @@ export function App() {
   return (
     <MobileFrame>
       <div className="min-h-screen bg-[#0A0A0A] text-white pb-32">
-        {/* Top App Bar (아이폰 Safe Area 보장) */}
+        {/* Top App Bar */}
         <header 
           style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 3.5rem)' }}
           className="sticky top-0 z-40 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-gray-800/60 px-5 pb-4 flex items-center justify-between"
         >
-          {/* Campic 로고 버튼 (클릭 시 페이지 리프레시) */}
           <button
             type="button"
             onClick={handleRefresh}
@@ -99,42 +121,50 @@ export function App() {
 
         {/* Main Content Area */}
         <main className="p-4 max-w-md mx-auto">
-          {activeTab === 'logs' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between px-1">
-                <h2 className="text-sm font-bold text-gray-300">
-                  나의 캠핑 기록 <span className="text-orange-500">{logs.length}</span>
-                </h2>
-              </div>
-              <div className="grid gap-4">
-                {logs.map((log) => (
-                  <LogCard 
-                    key={log.id} 
-                    log={log} 
-                    onClick={() => setSelectedLog(log)} 
-                    onSelect={(targetLog: CampingLog) => setSelectedLog(targetLog)} 
-                    onDelete={handleDeleteLog}
-                  />
-                ))}
-              </div>
+          {isLoading ? (
+            <div className="text-center py-20 text-gray-400 text-xs">
+              Vercel KV 스토리지 불러오는 중...
             </div>
-          )}
+          ) : (
+            <>
+              {activeTab === 'logs' && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between px-1">
+                    <h2 className="text-sm font-bold text-gray-300">
+                      나의 캠핑 기록 <span className="text-orange-500">{logs.length}</span>
+                    </h2>
+                  </div>
+                  <div className="grid gap-4">
+                    {logs.map((log) => (
+                      <LogCard 
+                        key={log.id} 
+                        log={log} 
+                        onClick={() => setSelectedLog(log)} 
+                        onSelect={(targetLog: CampingLog) => setSelectedLog(targetLog)} 
+                        onDelete={handleDeleteLog}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
 
-          {activeTab === 'map' && <CampingMapStats logs={logs} />}
+              {activeTab === 'map' && <CampingMapStats logs={logs} />}
 
-          {activeTab === 'editor' && (
-            <PhotoStampEditor 
-              log={logs[0]} 
-              onClose={() => setActiveTab('logs')} 
-            />
-          )}
+              {activeTab === 'editor' && (
+                <PhotoStampEditor 
+                  log={logs[0]} 
+                  onClose={() => setActiveTab('logs')} 
+                />
+              )}
 
-          {activeTab === 'gear' && (
-            <GearCloset 
-              gearList={gears} 
-              onAddGear={handleAddGear} 
-              onDeleteGear={handleDeleteGear}
-            />
+              {activeTab === 'gear' && (
+                <GearCloset 
+                  gearList={gears} 
+                  onAddGear={handleAddGear} 
+                  onDeleteGear={handleDeleteGear}
+                />
+              )}
+            </>
           )}
         </main>
 
