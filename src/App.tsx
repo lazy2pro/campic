@@ -18,6 +18,7 @@ export function App() {
   const [selectedLog, setSelectedLog] = useState<CampingLog | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
+  // 캠핑 로그 추가
   const handleAddLog = (newLogData: Omit<CampingLog, 'id'>) => {
     const newLog: CampingLog = {
       ...newLogData,
@@ -26,12 +27,26 @@ export function App() {
     setLogs((prevLogs) => [newLog, ...prevLogs]);
   };
 
+  // 캠핑 로그 삭제
+  const handleDeleteLog = (id: string) => {
+    setLogs((prevLogs) => prevLogs.filter((log) => log.id !== id));
+    if (selectedLog?.id === id) {
+      setSelectedLog(null);
+    }
+  };
+
+  // 장비 추가
   const handleAddGear = (newGear: Omit<GearItem, 'id'>) => {
     const gear: GearItem = {
       ...newGear,
       id: `gear-${Date.now()}`
     };
     setGears((prev) => [gear, ...prev]);
+  };
+
+  // 장비 삭제
+  const handleDeleteGear = (id: string) => {
+    setGears((prevGears) => prevGears.filter((gear) => gear.id !== id));
   };
 
   const handleOpenStampStudioFromDetail = () => {
@@ -42,7 +57,7 @@ export function App() {
   return (
     <MobileFrame>
       <div className="min-h-screen bg-[#0A0A0A] text-white pb-32">
-        {/* Top App Bar: 아이폰 16 Pro 다이나믹 아일랜드 여백 보장 (pt-14 + safe area) */}
+        {/* Top App Bar (아이폰 Safe Area 보장) */}
         <header 
           style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 3.5rem)' }}
           className="sticky top-0 z-40 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-gray-800/60 px-5 pb-4 flex items-center justify-between"
@@ -87,6 +102,7 @@ export function App() {
                     log={log} 
                     onClick={() => setSelectedLog(log)} 
                     onSelect={(targetLog: CampingLog) => setSelectedLog(targetLog)} 
+                    onDelete={handleDeleteLog}
                   />
                 ))}
               </div>
@@ -106,11 +122,12 @@ export function App() {
             <GearCloset 
               gearList={gears} 
               onAddGear={handleAddGear} 
+              onDeleteGear={handleDeleteGear}
             />
           )}
         </main>
 
-        {/* Bottom Navigation: 아이폰 하단 바 영역 여백 보장 */}
+        {/* Bottom Navigation */}
         <nav 
           style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)' }}
           className="fixed bottom-0 left-0 right-0 z-40 bg-[#121212]/95 backdrop-blur-lg border-t border-gray-800/80 max-w-md mx-auto px-6 pt-2"
