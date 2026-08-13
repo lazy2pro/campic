@@ -42,8 +42,8 @@ export function App() {
   return (
     <MobileFrame>
       <div className="min-h-screen bg-[#0A0A0A] text-white pb-24">
-        {/* Top App Bar */}
-        <header className="sticky top-0 z-40 bg-[#0A0A0A]/90 backdrop-blur-md border-b border-gray-800/60 px-5 py-4 flex items-center justify-between">
+        {/* Top App Bar: pt-12를 추가하여 상단 노치 영역 확보 */}
+        <header className="sticky top-0 z-40 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-gray-800/60 px-5 pt-12 pb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="p-2 bg-gradient-to-tr from-orange-500 to-amber-500 rounded-xl shadow-lg shadow-orange-500/20">
               <Tent size={20} className="text-white" />
@@ -59,6 +59,7 @@ export function App() {
           </div>
 
           <button
+            type="button"
             onClick={() => setIsAddModalOpen(true)}
             className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-xs px-3.5 py-2 rounded-xl shadow-md transition-all active:scale-95"
           >
@@ -107,9 +108,10 @@ export function App() {
         </main>
 
         {/* Bottom Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#121212]/95 backdrop-blur-lg border-t border-gray-800/80 max-w-md mx-auto px-6 py-2">
+        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#121212]/95 backdrop-blur-lg border-t border-gray-800/80 max-w-md mx-auto px-6 py-2 pb-6">
           <div className="flex justify-around items-center">
             <button
+              type="button"
               onClick={() => setActiveTab('logs')}
               className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 activeTab === 'logs' ? 'text-orange-500 font-bold' : 'text-gray-500 hover:text-gray-300'
@@ -120,6 +122,7 @@ export function App() {
             </button>
 
             <button
+              type="button"
               onClick={() => setActiveTab('map')}
               className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 activeTab === 'map' ? 'text-orange-500 font-bold' : 'text-gray-500 hover:text-gray-300'
@@ -130,6 +133,7 @@ export function App() {
             </button>
 
             <button
+              type="button"
               onClick={() => setActiveTab('editor')}
               className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 activeTab === 'editor' ? 'text-orange-500 font-bold' : 'text-gray-500 hover:text-gray-300'
@@ -140,6 +144,7 @@ export function App() {
             </button>
 
             <button
+              type="button"
               onClick={() => setActiveTab('gear')}
               className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                 activeTab === 'gear' ? 'text-orange-500 font-bold' : 'text-gray-500 hover:text-gray-300'
