@@ -1,15 +1,15 @@
 import { CampingLog, GearItem } from '../types/camping';
 import { initialLogs, initialGears } from '../data/mockData';
 
-// TypeScript import.meta.env 타입 에러 우회 처리
-const env = (import.meta as any).env || {};
+// Vite 환경변수 타입 안전 추출
+const env = (import.meta as unknown as { env: Record<string, string> }).env || {};
 const KV_URL = env.VITE_KV_REST_API_URL || "https://musical-wasp-163841.upstash.io";
 const KV_TOKEN = env.VITE_KV_REST_API_TOKEN || "gQAAAAAAAoABAAIgcDEwNDkxYTBmYmYwM2Q0MjM4YjI0ODU5NGVmM2NiYjlhZg";
 
 const LOGS_KEY = 'campic_logs';
 const GEARS_KEY = 'campic_gears';
 
-// Upstash REST API 통신 헬퍼 함수 (외부 라이브러리 미사용)
+// Upstash REST API 전송 헬퍼 (npm 패키지 필요 없음)
 async function kvCommand(command: string, key: string, value?: any) {
   const body = value !== undefined ? [command, key, JSON.stringify(value)] : [command, key];
   const response = await fetch(KV_URL, {
