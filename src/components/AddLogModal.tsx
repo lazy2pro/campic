@@ -11,14 +11,13 @@ interface AddLogModalProps {
 export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAddLog }) => {
   if (!isOpen) return null;
 
-  // 엑박 방지용 기본 예제 이미지
   const SAMPLE_IMAGE = "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80";
 
   const [images, setImages] = useState<string[]>([SAMPLE_IMAGE]);
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
-  const [campingType, setCampingType] = useState('오토캠핑');
-  const [season, setSeason] = useState<CampingSeason>('여름 🌿');
+  const [type, setType] = useState('오토캠핑');
+  const [season, setSeason] = useState<CampingSeason>('여름');
   const [date, setDate] = useState('2026-08-13');
   const [duration, setDuration] = useState('1박 2일');
   const [temp, setTemp] = useState(22);
@@ -30,14 +29,15 @@ export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAdd
 
     const weatherObj: WeatherInfo = {
       condition: '맑음',
-      temp: temp
+      temp: temp,
+      icon: '☀️'
     };
 
     onAddLog({
       title: title || '즐거운 캠핑',
       location: location || '캠핑장',
       date,
-      campingType,
+      type,
       season,
       duration,
       weather: weatherObj,
@@ -64,7 +64,6 @@ export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAdd
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto">
-      {/* 상단 짤림 방지 (pt-10 / safe-area 대응) 및 레이아웃 정리 */}
       <div className="bg-[#121212] text-white w-full max-w-lg rounded-t-3xl sm:rounded-2xl max-h-[92vh] flex flex-col pt-10 pb-6 px-5 sm:p-6 overflow-y-auto border border-gray-800 shadow-2xl">
         
         {/* Header */}
@@ -93,14 +92,12 @@ export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAdd
               캠핑 사진 (원본 업로드)
             </label>
             <div className="flex items-center gap-3 overflow-x-auto pb-2">
-              {/* 업로드 버튼 */}
               <label className="flex flex-col items-center justify-center w-24 h-24 min-w-[6rem] rounded-xl border-2 border-dashed border-gray-700 bg-gray-900/50 hover:bg-gray-800/50 cursor-pointer transition-colors shrink-0">
                 <Upload size={20} className="text-orange-500 mb-1" />
                 <span className="text-[11px] text-gray-400">사진 추가</span>
                 <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
               </label>
 
-              {/* 이미지 목록 및 썸네일 */}
               {images.map((img, idx) => (
                 <div key={idx} className="relative w-24 h-24 min-w-[6rem] rounded-xl overflow-hidden border border-gray-700 bg-gray-800 shrink-0">
                   <img src={img} alt={`preview-${idx}`} className="w-full h-full object-cover" />
@@ -143,8 +140,8 @@ export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAdd
             <div>
               <label className="block text-xs font-semibold text-gray-400 mb-1.5">캠핑 종류</label>
               <select 
-                value={campingType} 
-                onChange={(e) => setCampingType(e.target.value)}
+                value={type} 
+                onChange={(e) => setType(e.target.value)}
                 className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-orange-500"
               >
                 <option value="오토캠핑">오토캠핑</option>
@@ -160,10 +157,10 @@ export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAdd
                 onChange={(e) => setSeason(e.target.value as CampingSeason)}
                 className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-orange-500"
               >
-                <option value="여름 🌿">여름 🌿</option>
-                <option value="봄 🌸">봄 🌸</option>
-                <option value="가을 🍁">가을 🍁</option>
-                <option value="겨울 ❄️">겨울 ❄️</option>
+                <option value="여름">여름 🌿</option>
+                <option value="봄">봄 🌸</option>
+                <option value="가을">가을 🍁</option>
+                <option value="겨울">겨울 ❄️</option>
               </select>
             </div>
           </div>
