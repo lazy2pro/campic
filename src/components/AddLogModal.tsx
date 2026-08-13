@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { X, Upload, Flame, Sun, Calendar, Tent } from 'lucide-react';
-import { CampingLog } from '../types/camping';
+import { X, Upload, Flame } from 'lucide-react';
+import { CampingLog, CampingSeason, WeatherInfo } from '../types/camping';
 
 interface AddLogModalProps {
   isOpen: boolean;
@@ -11,14 +11,14 @@ interface AddLogModalProps {
 export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAddLog }) => {
   if (!isOpen) return null;
 
-  // 샘플 기본 이미지 (엑박 방지용)
+  // 엑박 방지용 기본 예제 이미지
   const SAMPLE_IMAGE = "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80";
 
   const [images, setImages] = useState<string[]>([SAMPLE_IMAGE]);
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
   const [campingType, setCampingType] = useState('오토캠핑');
-  const [season, setSeason] = useState('여름 🌿');
+  const [season, setSeason] = useState<CampingSeason>('여름 🌿');
   const [date, setDate] = useState('2026-08-13');
   const [duration, setDuration] = useState('1박 2일');
   const [temp, setTemp] = useState(22);
@@ -27,6 +27,12 @@ export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAdd
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    const weatherObj: WeatherInfo = {
+      condition: '맑음',
+      temp: temp
+    };
+
     onAddLog({
       title: title || '즐거운 캠핑',
       location: location || '캠핑장',
@@ -34,7 +40,7 @@ export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAdd
       campingType,
       season,
       duration,
-      weather: `맑음 (${temp}°C)`,
+      weather: weatherObj,
       fireCount: Number(fireCount),
       images: images.length > 0 ? images : [SAMPLE_IMAGE],
       content,
@@ -58,7 +64,7 @@ export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAdd
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto">
-      {/* 상단 짤림 방지를 위해 pt-12 및 pt-safe 추가 */}
+      {/* 상단 짤림 방지 (pt-10 / safe-area 대응) 및 레이아웃 정리 */}
       <div className="bg-[#121212] text-white w-full max-w-lg rounded-t-3xl sm:rounded-2xl max-h-[92vh] flex flex-col pt-10 pb-6 px-5 sm:p-6 overflow-y-auto border border-gray-800 shadow-2xl">
         
         {/* Header */}
@@ -70,6 +76,7 @@ export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAdd
             <h2 className="text-lg font-bold">새 캠핑 로그 남기기</h2>
           </div>
           <button 
+            type="button"
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-white rounded-full bg-gray-800/50 hover:bg-gray-800 transition-colors"
           >
@@ -150,7 +157,7 @@ export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAdd
               <label className="block text-xs font-semibold text-gray-400 mb-1.5">계절</label>
               <select 
                 value={season} 
-                onChange={(e) => setSeason(e.target.value)}
+                onChange={(e) => setSeason(e.target.value as CampingSeason)}
                 className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-orange-500"
               >
                 <option value="여름 🌿">여름 🌿</option>
