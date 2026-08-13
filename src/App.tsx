@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Tent, Compass, Camera, Package } from 'lucide-react';
 import { CampingLog, GearItem } from './types/camping';
-import { initialLogs, initialGears } from './data/mockData';
+import { mockLogs, mockGears } from './data/mockData';
 import { LogCard } from './components/LogCard';
 import { LogDetailModal } from './components/LogDetailModal';
 import { AddLogModal } from './components/AddLogModal';
@@ -12,13 +12,12 @@ import { MobileFrame } from './components/MobileFrame';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<'logs' | 'map' | 'editor' | 'gear'>('logs');
-  const [logs, setLogs] = useState<CampingLog[]>(initialLogs);
-  const [gears, setGears] = useState<GearItem[]>(initialGears);
+  const [logs, setLogs] = useState<CampingLog[]>(mockLogs);
+  const [gears, setGears] = useState<GearItem[]>(mockGears);
   
   const [selectedLog, setSelectedLog] = useState<CampingLog | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  // Omit<CampingLog, 'id'> 타입을 받아 내부에서 고유 ID를 생성해 추가
   const handleAddLog = (newLogData: Omit<CampingLog, 'id'>) => {
     const newLog: CampingLog = {
       ...newLogData,
@@ -27,12 +26,9 @@ export function App() {
     setLogs((prevLogs) => [newLog, ...prevLogs]);
   };
 
-  const handleAddGear = (newGear: Omit<GearItem, 'id'>) => {
-    const gear: GearItem = {
-      ...newGear,
-      id: `gear-${Date.now()}`
-    };
-    setGears((prev) => [gear, ...prev]);
+  const handleOpenStampStudioFromDetail = () => {
+    setSelectedLog(null);
+    setActiveTab('editor');
   };
 
   return (
@@ -74,7 +70,7 @@ export function App() {
               </div>
               <div className="grid gap-4">
                 {logs.map((log) => (
-                  <LogCard key={log.id} log={log} onClick={() => setSelectedLog(log)} />
+                  <LogCard key={log.id} log={log} onSelect={(selected) => setSelectedLog(selected)} />
                 ))}
               </div>
             </div>
@@ -82,9 +78,9 @@ export function App() {
 
           {activeTab === 'map' && <CampingMapStats logs={logs} />}
 
-          {activeTab === 'editor' && <PhotoStampEditor logs={logs} />}
+          {activeTab === 'editor' && <PhotoStampEditor log={logs[0]} />}
 
-          {activeTab === 'gear' && <GearCloset gears={gears} onAddGear={handleAddGear} />}
+          {activeTab === 'gear' && <GearCloset />}
         </main>
 
         {/* Bottom Navigation */}
@@ -134,7 +130,11 @@ export function App() {
 
         {/* Modals */}
         {selectedLog && (
-          <LogDetailModal log={selectedLog} onClose={() => setSelectedLog(null)} />
+          <LogDetailModal 
+            log={selectedLog} 
+            onClose={() => setSelectedLog(null)} 
+            onOpenStampStudio={handleOpenStampStudioFromDetail}
+          />
         )}
 
         <AddLogModal
