@@ -16,8 +16,8 @@ export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAdd
   const [images, setImages] = useState<string[]>([SAMPLE_IMAGE]);
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
-  const [campingType, setCampingType] = useState('오토캠핑');
-  const [season, setSeason] = useState<CampingSeason>('여름 🌿');
+  const [type, setType] = useState('오토캠핑');
+  const [season, setSeason] = useState<CampingSeason>('여름');
   const [date, setDate] = useState('2026-08-13');
   const [duration, setDuration] = useState('1박 2일');
   const [temp, setTemp] = useState(22);
@@ -37,7 +37,7 @@ export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAdd
       title: title || '즐거운 캠핑',
       location: location || '캠핑장',
       date,
-      campingType,
+      type,
       season,
       duration,
       weather: weatherObj,
@@ -64,6 +64,7 @@ export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAdd
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-0 sm:p-4 overflow-y-auto">
+      {/* 상단 노치/다이나믹 아일랜드 대응 패딩 및 스크롤 개선 */}
       <div className="bg-[#121212] text-white w-full max-w-lg rounded-t-3xl sm:rounded-2xl max-h-[92vh] flex flex-col pt-10 pb-6 px-5 sm:p-6 overflow-y-auto border border-gray-800 shadow-2xl">
         
         {/* Header */}
@@ -140,8 +141,8 @@ export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAdd
             <div>
               <label className="block text-xs font-semibold text-gray-400 mb-1.5">캠핑 종류</label>
               <select 
-                value={campingType} 
-                onChange={(e) => setCampingType(e.target.value)}
+                value={type} 
+                onChange={(e) => setType(e.target.value)}
                 className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-orange-500"
               >
                 <option value="오토캠핑">오토캠핑</option>
@@ -157,10 +158,10 @@ export const AddLogModal: React.FC<AddLogModalProps> = ({ isOpen, onClose, onAdd
                 onChange={(e) => setSeason(e.target.value as CampingSeason)}
                 className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-orange-500"
               >
-                <option value="여름 🌿">여름 🌿</option>
-                <option value="봄 🌸">봄 🌸</option>
-                <option value="가을 🍁">가을 🍁</option>
-                <option value="겨울 ❄️">겨울 ❄️</option>
+                <option value="여름">여름 🌿</option>
+                <option value="봄">봄 🌸</option>
+                <option value="가을">가을 🍁</option>
+                <option value="겨울">겨울 ❄️</option>
               </select>
             </div>
           </div>
