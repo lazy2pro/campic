@@ -1,95 +1,75 @@
 import React from 'react';
+import { MapPin, Compass, Flame, TrendingUp } from 'lucide-react';
 import { CampingLog } from '../types/camping';
-import { Award, Compass } from 'lucide-react';
 
 interface CampingMapStatsProps {
   logs: CampingLog[];
 }
 
 export const CampingMapStats: React.FC<CampingMapStatsProps> = ({ logs }) => {
-  const totalTrips = logs.length;
+  const totalVisits = logs.length;
+  
+  // duration 필드에서 박 수 추출 (기본 1박)
   const totalNights = logs.reduce((acc, log) => {
-    const match = log.nights.match(/(\d+)박/);
-    return acc + (match ? parseInt(match[1]) : 1);
+    const match = log.duration?.match(/(\d+)박/);
+    return acc + (match ? parseInt(match[1], 10) : 1);
   }, 0);
 
-  const maxFireLog = Math.max(...logs.map((l) => l.fireLogCount || 0), 0);
+  // 총 불멍 회차
+  const totalFireCount = logs.reduce((acc, log) => acc + (log.fireCount || 0), 0);
 
-  const categoryCounts = logs.reduce((acc, log) => {
-    acc[log.category] = (acc[log.category] || 0) + 1;
+  // 캠핑 스타일 분포
+  const typeDistribution = logs.reduce((acc: Record<string, number>, log) => {
+    const typeKey = log.campingType || log.type || '오토캠핑';
+    acc[typeKey] = (acc[typeKey] || 0) + 1;
     return acc;
-  }, {} as Record<string, number>);
+  }, {});
 
   return (
-    <div className="p-4 flex flex-col gap-5 text-slate-100">
-      
-      {/* Top Banner Stats Card */}
-      <div className="relative bg-gradient-to-r from-charcoal-900 via-charcoal-850 to-charcoal-900 border border-campfire-500/30 p-5 rounded-3xl shadow-glow-orange overflow-hidden">
-        <div className="absolute top-0 right-0 w-36 h-36 bg-campfire-500/10 rounded-full blur-3xl" />
-        
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 text-campfire-400 font-bold text-xs uppercase tracking-wider mb-1">
-            <Award className="w-4 h-4" />
-            <span>2026 캠핑 스태티스틱</span>
+    <div className="space-y-5 text-white">
+      {/* 통계 요약 카드리스트 */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-[#18181B] border border-gray-800 p-4 rounded-2xl flex items-center gap-3">
+          <div className="p-2.5 bg-orange-500/10 text-orange-500 rounded-xl">
+            <Compass size={22} />
           </div>
+          <div>
+            <p className="text-[11px] text-gray-400 font-medium">총 캠핑 횟수</p>
+            <p className="text-lg font-bold text-white">{totalVisits}회 <span className="text-xs text-orange-400">({totalNights}박)</span></p>
+          </div>
+        </div>
 
-          <h2 className="text-2xl font-black text-white">
-            올해 총 <span className="text-campfire-400">{totalNights}박 {totalNights + totalTrips}일</span> 달성! 🎉
-          </h2>
-          <p className="text-xs text-slate-300 mt-1">
-            총 {totalTrips}번의 캠핑과 {maxFireLog}번의 불멍을 사진 로그로 기록했습니다.
-          </p>
-
-          <div className="grid grid-cols-3 gap-3 mt-4 pt-3 border-t border-white/10 text-center">
-            <div className="bg-charcoal-950/60 p-2.5 rounded-2xl border border-white/5">
-              <span className="text-[10px] text-slate-400 block font-mono">총 출정에 간 수</span>
-              <span className="text-base font-bold text-slate-100">{totalTrips}회</span>
-            </div>
-            <div className="bg-charcoal-950/60 p-2.5 rounded-2xl border border-white/5">
-              <span className="text-[10px] text-slate-400 block font-mono">누적 불멍 횟수</span>
-              <span className="text-base font-bold text-campfire-400">🔥 {maxFireLog}회</span>
-            </div>
-            <div className="bg-charcoal-950/60 p-2.5 rounded-2xl border border-white/5">
-              <span className="text-[10px] text-slate-400 block font-mono">평균 만족도</span>
-              <span className="text-base font-bold text-amber-400">★ 4.9</span>
-            </div>
+        <div className="bg-[#18181B] border border-gray-800 p-4 rounded-2xl flex items-center gap-3">
+          <div className="p-2.5 bg-amber-500/10 text-amber-500 rounded-xl">
+            <Flame size={22} />
+          </div>
+          <div>
+            <p className="text-[11px] text-gray-400 font-medium">누적 불멍 회차</p>
+            <p className="text-lg font-bold text-white">{totalFireCount}회</p>
           </div>
         </div>
       </div>
 
-      {/* Campsite Map Pin Visualization */}
-      <div className="bg-charcoal-900 border border-white/10 p-4 rounded-3xl">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Compass className="w-4 h-4 text-campfire-400" />
-            <h3 className="font-bold text-sm text-slate-100">전국 캠핑지도 핀 뷰어</h3>
-          </div>
-          <span className="text-[11px] text-slate-400 font-mono">{logs.length}개 캠핑장</span>
+      {/* 캠핑 스타일 분포 */}
+      <div className="bg-[#18181B] border border-gray-800 p-4 rounded-2xl space-y-3">
+        <div className="flex items-center gap-2 border-b border-gray-800 pb-2">
+          <TrendingUp size={16} className="text-orange-400" />
+          <h3 className="text-xs font-bold text-gray-200 uppercase tracking-wider">선호 캠핑 스타일</h3>
         </div>
-
-        {/* Visual Map Area */}
-        <div className="relative w-full h-56 bg-forest-900 rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center bg-[radial-gradient(#1e3a2b_1px,transparent_1px)] [background-size:16px_16px]">
-          
-          {/* Map Topographic Overlay */}
-          <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-500 via-transparent to-transparent" />
-
-          {/* Korea Map Pins Mockup */}
-          {logs.map((log, idx) => {
-            const posX = 30 + (idx * 25) % 55;
-            const posY = 25 + (idx * 28) % 50;
+        <div className="space-y-2">
+          {Object.entries(typeDistribution).map(([type, count]) => {
+            const percentage = Math.round((count / (totalVisits || 1)) * 100);
             return (
-              <div
-                key={log.id}
-                style={{ top: `${posY}%`, left: `${posX}%` }}
-                className="absolute -translate-x-1/2 -translate-y-1/2 group cursor-pointer"
-              >
-                <div className="relative flex flex-col items-center">
-                  <div className="w-8 h-8 rounded-full bg-campfire-500 border-2 border-white text-white flex items-center justify-center font-bold text-xs shadow-glow-orange group-hover:scale-110 transition-all">
-                    🔥
-                  </div>
-                  <div className="bg-black/80 backdrop-blur-md px-2 py-0.5 rounded text-[9px] font-semibold text-slate-200 mt-1 whitespace-nowrap border border-white/10 shadow-md">
-                    {log.campsite}
-                  </div>
+              <div key={type} className="space-y-1">
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-300 font-medium">{type}</span>
+                  <span className="text-orange-400 font-bold">{count}회 ({percentage}%)</span>
+                </div>
+                <div className="w-full bg-gray-900 rounded-full h-2 overflow-hidden">
+                  <div 
+                    className="bg-gradient-to-r from-orange-500 to-amber-500 h-2 rounded-full transition-all duration-500" 
+                    style={{ width: `${percentage}%` }}
+                  />
                 </div>
               </div>
             );
@@ -97,21 +77,24 @@ export const CampingMapStats: React.FC<CampingMapStatsProps> = ({ logs }) => {
         </div>
       </div>
 
-      {/* Camping Style Breakdown */}
-      <div className="bg-charcoal-900 border border-white/10 p-4 rounded-3xl">
-        <h3 className="font-bold text-sm text-slate-100 mb-3">선호하는 캠핑 스타일</h3>
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          {Object.entries(categoryCounts).map(([cat, count]) => (
-            <div key={cat} className="bg-charcoal-950 p-3 rounded-2xl border border-white/5 flex items-center justify-between">
-              <span className="font-medium text-slate-300">{cat}</span>
-              <span className="font-bold text-campfire-400 bg-campfire-500/10 px-2 py-0.5 rounded-lg border border-campfire-500/20">
-                {count}회
-              </span>
+      {/* 최근 방문한 캠핑지 목록 */}
+      <div className="bg-[#18181B] border border-gray-800 p-4 rounded-2xl space-y-3">
+        <div className="flex items-center gap-2 border-b border-gray-800 pb-2">
+          <MapPin size={16} className="text-orange-400" />
+          <h3 className="text-xs font-bold text-gray-200 uppercase tracking-wider">방문한 캠핑장</h3>
+        </div>
+        <div className="space-y-2.5">
+          {logs.map((log) => (
+            <div key={log.id} className="flex items-center justify-between p-2.5 bg-gray-900/60 rounded-xl border border-gray-800/80 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-orange-500" />
+                <span className="font-semibold text-gray-200">{log.location}</span>
+              </div>
+              <span className="text-gray-400 text-[11px]">{log.date}</span>
             </div>
           ))}
         </div>
       </div>
-
     </div>
   );
 };
