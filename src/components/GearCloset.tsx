@@ -1,118 +1,104 @@
 import React, { useState } from 'react';
-import { GearItem } from '../types/camping';
-import { Plus, CheckSquare, Square } from 'lucide-react';
+import { Package, Plus, Calendar, Trash2 } from 'lucide-react';
+import { GearItem, GearCategory } from '../types/camping';
 
-interface GearClosetProps {
-  gearList: GearItem[];
-  onAddGear: (gear: GearItem) => void;
+export interface GearClosetProps {
+  gearList?: GearItem[];
+  onAddGear?: (gear: Omit<GearItem, 'id'>) => void;
+  onDeleteGear?: (id: string) => void;
 }
 
-export const GearCloset: React.FC<GearClosetProps> = ({ gearList, onAddGear }) => {
-  const [activeCategory, setActiveCategory] = useState<string>('전체');
-  const [checklist, setChecklist] = useState<Record<string, boolean>>({
-    'gear-1': true,
-    'gear-2': true,
-    'gear-3': false,
-  });
+const CATEGORIES: GearCategory[] = [
+  '텐트/셸터',
+  '침구/매트',
+  '취사/화로',
+  '조명/랜턴',
+  '체어/테이블',
+  '기타장비'
+];
 
-  const [showAddForm, setShowAddForm] = useState<boolean>(false);
-  const [newGearName, setNewGearName] = useState('');
-  const [newGearBrand, setNewGearBrand] = useState('');
-  const [newGearCategory, setNewGearCategory] = useState<GearItem['category']>('텐트/셸터');
+export const GearCloset: React.FC<GearClosetProps> = ({ gearList = [], onAddGear, onDeleteGear }) => {
+  const [selectedCategory, setSelectedCategory] = useState<string>('전체');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const filteredGear = activeCategory === '전체'
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState<GearCategory>('텐트/셸터');
+  const [purchaseDate, setPurchaseDate] = useState('');
+  const [price, setPrice] = useState<number | ''>('');
+  const [memo, setMemo] = useState('');
+
+  const filteredGears = selectedCategory === '전체'
     ? gearList
-    : gearList.filter((g) => g.category === activeCategory);
+    : gearList.filter((item) => item.category === selectedCategory);
 
-  const toggleChecklist = (id: string) => {
-    setChecklist((prev) => ({ ...prev, [id]: !prev[id] }));
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+
+    if (onAddGear) {
+      onAddGear({
+        name,
+        category,
+        purchaseDate: purchaseDate || undefined,
+        price: price === '' ? undefined : Number(price),
+        memo: memo || undefined
+      });
+    }
+
+    setName('');
+    setCategory('텐트/셸터');
+    setPurchaseDate('');
+    setPrice('');
+    setMemo('');
+    setIsModalOpen(false);
   };
 
-  const handleCreateGear = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newGearName) return;
-
-    const gear: GearItem = {
-      id: `gear-${Date.now()}`,
-      name: newGearName,
-      brand: newGearBrand || 'Custom',
-      category: newGearCategory,
-      usageCount: 1,
-      notes: '새로 보관함에 등록된 장비입니다.'
-    };
-
-    onAddGear(gear);
-    setNewGearName('');
-    setNewGearBrand('');
-    setShowAddForm(false);
+  const handleDelete = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm('이 장비를 삭제하시겠습니까?') && onDeleteGear) {
+      onDeleteGear(id);
+    }
   };
 
   return (
-    <div className="p-4 flex flex-col gap-4 text-slate-100">
-      {/* Header */}
+    <div className="space-y-4 text-white">
+      {/* Top Controls */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="font-bold text-lg text-slate-100">나의 캠핑 장비 보관함</h2>
-          <p className="text-xs text-slate-400">캠핑 로그와 연동되는 장비 및 출정 패킹 체크리스트</p>
-        </div>
+        <h2 className="text-sm font-bold text-gray-300">
+          내 장비 도감 <span className="text-orange-500">{gearList.length}</span>
+        </h2>
         <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="px-3 py-1.5 bg-campfire-500 hover:bg-campfire-600 font-bold text-xs rounded-xl text-white shadow-glow-orange flex items-center gap-1 transition-all"
+          type="button"
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-1 bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1.5 rounded-xl font-semibold transition-all active:scale-95"
         >
-          <Plus className="w-4 h-4" />
+          <Plus size={14} />
           <span>장비 등록</span>
         </button>
       </div>
 
-      {/* Add Gear Form */}
-      {showAddForm && (
-        <form onSubmit={handleCreateGear} className="bg-charcoal-900 border border-white/10 p-4 rounded-2xl flex flex-col gap-3 text-xs">
-          <h3 className="font-bold text-slate-200">새 캠핑 장비 추가</h3>
-          <div className="grid grid-cols-2 gap-2">
-            <input
-              type="text"
-              placeholder="장비 이름 (예: 노나돔 텐트)"
-              value={newGearName}
-              onChange={(e) => setNewGearName(e.target.value)}
-              className="px-3 py-2 bg-charcoal-800 border border-white/10 rounded-xl text-white"
-              required
-            />
-            <input
-              type="text"
-              placeholder="브랜드 (예: Helinox)"
-              value={newGearBrand}
-              onChange={(e) => setNewGearBrand(e.target.value)}
-              className="px-3 py-2 bg-charcoal-800 border border-white/10 rounded-xl text-white"
-            />
-          </div>
-          <select
-            value={newGearCategory}
-            onChange={(e) => setNewGearCategory(e.target.value as GearItem['category'])}
-            className="px-3 py-2 bg-charcoal-800 border border-white/10 rounded-xl text-white"
-          >
-            <option value="텐트/셸터">텐트/셸터</option>
-            <option value="체어/테이블">체어/테이블</option>
-            <option value="취사/화로">취사/화로</option>
-            <option value="조명/랜턴">조명/랜턴</option>
-            <option value="침구/매트">침구/매트</option>
-            <option value="기타장비">기타장비</option>
-          </select>
-          <button type="submit" className="py-2 bg-campfire-500 font-bold rounded-xl text-white">
-            보관함에 저장하기
-          </button>
-        </form>
-      )}
-
-      {/* Category Tabs */}
-      <div className="flex gap-1.5 overflow-x-auto pb-1">
-        {['전체', '텐트/셸터', '체어/테이블', '취사/화로', '조명/랜턴', '침구/매트'].map((cat) => (
+      {/* Category Filter Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-1 text-xs no-scrollbar">
+        <button
+          type="button"
+          onClick={() => setSelectedCategory('전체')}
+          className={`px-3 py-1.5 rounded-xl border whitespace-nowrap transition-all ${
+            selectedCategory === '전체'
+              ? 'bg-orange-500 text-white border-orange-500 font-bold'
+              : 'bg-gray-900 border-gray-800 text-gray-400 hover:text-white'
+          }`}
+        >
+          전체
+        </button>
+        {CATEGORIES.map((cat) => (
           <button
             key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className={`px-3 py-1.5 rounded-xl border text-xs font-medium whitespace-nowrap transition-all ${
-              activeCategory === cat
-                ? 'bg-campfire-500 border-campfire-400 text-white'
-                : 'bg-charcoal-900 border-white/10 text-slate-400 hover:text-slate-200'
+            type="button"
+            onClick={() => setSelectedCategory(cat)}
+            className={`px-3 py-1.5 rounded-xl border whitespace-nowrap transition-all ${
+              selectedCategory === cat
+                ? 'bg-orange-500 text-white border-orange-500 font-bold'
+                : 'bg-gray-900 border-gray-800 text-gray-400 hover:text-white'
             }`}
           >
             {cat}
@@ -120,36 +106,150 @@ export const GearCloset: React.FC<GearClosetProps> = ({ gearList, onAddGear }) =
         ))}
       </div>
 
-      {/* Gear List Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {filteredGear.map((gear) => (
-          <div key={gear.id} className="bg-charcoal-900 border border-white/10 p-3.5 rounded-2xl flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button onClick={() => toggleChecklist(gear.id)} className="text-campfire-400">
-                {checklist[gear.id] ? (
-                  <CheckSquare className="w-5 h-5 text-campfire-500 fill-campfire-500/20" />
-                ) : (
-                  <Square className="w-5 h-5 text-slate-500" />
-                )}
-              </button>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-sm text-slate-100">{gear.name}</span>
-                  <span className="text-[10px] bg-charcoal-800 text-slate-400 px-1.5 py-0.5 rounded border border-white/5 font-mono">
-                    {gear.brand}
+      {/* Gear Grid / List */}
+      <div className="grid gap-3">
+        {filteredGears.length === 0 ? (
+          <div className="text-center py-12 bg-gray-900/40 rounded-2xl border border-gray-800/80 p-6">
+            <Package size={32} className="mx-auto text-gray-600 mb-2" />
+            <p className="text-xs text-gray-400">등록된 장비가 없습니다.</p>
+          </div>
+        ) : (
+          filteredGears.map((item) => (
+            <div
+              key={item.id}
+              className="bg-[#18181B] border border-gray-800 p-4 rounded-2xl space-y-2 shadow-md hover:border-gray-700 transition-all relative"
+            >
+              <div className="flex items-start justify-between pr-8">
+                <div>
+                  <span className="inline-block bg-orange-500/10 text-orange-400 text-[10px] font-bold px-2 py-0.5 rounded-md border border-orange-500/20 mb-1">
+                    {item.category}
                   </span>
+                  <h3 className="font-bold text-sm text-white">{item.name}</h3>
                 </div>
-                <div className="text-[11px] text-slate-400 mt-0.5">{gear.notes}</div>
+                {item.price !== undefined && item.price > 0 && (
+                  <span className="text-xs font-semibold text-gray-300">
+                    ₩{item.price.toLocaleString()}
+                  </span>
+                )}
               </div>
+
+              {/* 장비 삭제 버튼 */}
+              {onDeleteGear && (
+                <button
+                  type="button"
+                  onClick={(e) => handleDelete(item.id, e)}
+                  className="absolute top-4 right-4 text-gray-500 hover:text-red-400 p-1 transition-colors"
+                  title="장비 삭제"
+                >
+                  <Trash2 size={15} />
+                </button>
+              )}
+
+              {(item.purchaseDate || item.memo) && (
+                <div className="pt-2 border-t border-gray-800/60 text-xs text-gray-400 space-y-1">
+                  {item.purchaseDate && (
+                    <div className="flex items-center gap-1 text-[11px] text-gray-500">
+                      <Calendar size={12} />
+                      <span>구매일: {item.purchaseDate}</span>
+                    </div>
+                  )}
+                  {item.memo && (
+                    <p className="text-xs text-gray-300 bg-gray-900/60 p-2 rounded-lg border border-gray-800/60 mt-1">
+                      {item.memo}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Add Gear Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="bg-[#121212] border border-gray-800 text-white w-full max-w-sm rounded-2xl p-5 space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-gray-800 pb-3">
+              <h3 className="font-bold text-sm">새 장비 추가</h3>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-400 hover:text-white text-xs"
+              >
+                닫기
+              </button>
             </div>
 
-            <div className="text-right">
-              <span className="text-[10px] text-slate-400 block font-mono">누적 사용</span>
-              <span className="text-xs font-bold text-campfire-400">{gear.usageCount}회 출정</span>
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-3 text-xs">
+              <div>
+                <label className="block text-gray-400 mb-1">장비명</label>
+                <input
+                  type="text"
+                  placeholder="예: 힐레베르그 남마치 3 GT"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-400 mb-1">카테고리</label>
+                <select
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as GearCategory)}
+                  className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                >
+                  {CATEGORIES.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-gray-400 mb-1">구매일</label>
+                  <input
+                    type="text"
+                    placeholder="2026. 05"
+                    value={purchaseDate}
+                    onChange={(e) => setPurchaseDate(e.target.value)}
+                    className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-400 mb-1">가격 (원)</label>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value === '' ? '' : Number(e.target.value))}
+                    className="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-gray-400 mb-1">메모</label>
+                <textarea
+                  rows={2}
+                  placeholder="상세 규격, 사용 팁 등"
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                  className="w-full bg-gray-900 border border-gray-800 rounded-xl p-2.5 text-white focus:outline-none focus:border-orange-500 resize-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 rounded-xl shadow-md transition-all active:scale-[0.99] mt-2"
+              >
+                장비 등록하기
+              </button>
+            </form>
           </div>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
