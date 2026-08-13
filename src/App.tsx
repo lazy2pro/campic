@@ -9,15 +9,15 @@ import { PhotoStampEditor } from './components/PhotoStampEditor';
 import { GearCloset } from './components/GearCloset';
 import { MobileFrame } from './components/MobileFrame';
 
-// 기본 샘플 데이터
+// 타입 검증을 마친 기본 샘플 데이터
 const initialLogs: CampingLog[] = [
   {
     id: '1',
     title: '영월 잣나무 숲속 불멍 힐링',
     location: '영월 잣나무 캠핑장',
     date: '2026. 8. 13.',
-    campingType: '오토캠핑',
-    season: '여름 🌿',
+    type: '오토캠핑',
+    season: '여름',
     duration: '1박 2일',
     weather: { condition: '맑음', temp: 22, icon: '☀️' },
     fireCount: 1,
@@ -31,7 +31,7 @@ const initialGears: GearItem[] = [
   {
     id: 'g1',
     name: '터널 텐트',
-    category: '텐트/쉘터',
+    category: '텐트/셸터',
     purchaseDate: '2025. 05',
     price: 0,
     memo: '메인 리빙쉘'
@@ -106,7 +106,7 @@ export function App() {
               </div>
               <div className="grid gap-4">
                 {logs.map((log) => (
-                  <LogCard key={log.id} log={log} onClick={() => setSelectedLog(log)} />
+                  <LogCard key={log.id} log={log} onSelect={(selectedLog) => setSelectedLog(selectedLog)} />
                 ))}
               </div>
             </div>
