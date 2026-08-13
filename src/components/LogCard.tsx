@@ -1,23 +1,31 @@
 import React from 'react';
-import { MapPin, Calendar, Flame } from 'lucide-react';
+import { MapPin, Calendar, Flame, Trash2 } from 'lucide-react';
 import { CampingLog } from '../types/camping';
 
 export interface LogCardProps {
   log: CampingLog;
   onClick?: () => void;
   onSelect?: (log: CampingLog) => void;
+  onDelete?: (id: string) => void;
 }
 
-export const LogCard: React.FC<LogCardProps> = ({ log, onClick, onSelect }) => {
+export const LogCard: React.FC<LogCardProps> = ({ log, onClick, onSelect, onDelete }) => {
   const handleClick = () => {
     if (onClick) onClick();
     if (onSelect) onSelect(log);
   };
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 상세 모달 열림 방지
+    if (window.confirm('이 캠핑 기록을 삭제하시겠습니까?') && onDelete) {
+      onDelete(log.id);
+    }
+  };
+
   return (
     <div 
       onClick={handleClick}
-      className="bg-[#18181B] border border-gray-800/80 rounded-2xl overflow-hidden shadow-lg hover:border-orange-500/50 transition-all cursor-pointer active:scale-[0.98]"
+      className="bg-[#18181B] border border-gray-800/80 rounded-2xl overflow-hidden shadow-lg hover:border-orange-500/50 transition-all cursor-pointer active:scale-[0.98] relative group"
     >
       <div className="relative h-48 w-full bg-gray-900">
         <img 
@@ -33,6 +41,18 @@ export const LogCard: React.FC<LogCardProps> = ({ log, onClick, onSelect }) => {
             {log.season}
           </span>
         </div>
+
+        {/* 삭제 버튼 추가 */}
+        {onDelete && (
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="absolute top-3 right-3 p-2 bg-black/60 hover:bg-red-500/80 backdrop-blur-md text-white rounded-full transition-all border border-white/10"
+            title="기록 삭제"
+          >
+            <Trash2 size={14} />
+          </button>
+        )}
       </div>
 
       <div className="p-4 space-y-2">
