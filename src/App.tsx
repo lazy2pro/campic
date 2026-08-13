@@ -41,9 +41,12 @@ export function App() {
 
   return (
     <MobileFrame>
-      <div className="min-h-screen bg-[#0A0A0A] text-white pb-24">
-        {/* Top App Bar: pt-12를 추가하여 상단 노치 영역 확보 */}
-        <header className="sticky top-0 z-40 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-gray-800/60 px-5 pt-12 pb-4 flex items-center justify-between">
+      <div className="min-h-screen bg-[#0A0A0A] text-white pb-32">
+        {/* Top App Bar: 아이폰 16 Pro 다이나믹 아일랜드 여백 보장 (pt-14 + safe area) */}
+        <header 
+          style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 3.5rem)' }}
+          className="sticky top-0 z-40 bg-[#0A0A0A]/95 backdrop-blur-md border-b border-gray-800/60 px-5 pb-4 flex items-center justify-between"
+        >
           <div className="flex items-center gap-2">
             <span className="p-2 bg-gradient-to-tr from-orange-500 to-amber-500 rounded-xl shadow-lg shadow-orange-500/20">
               <Tent size={20} className="text-white" />
@@ -107,8 +110,11 @@ export function App() {
           )}
         </main>
 
-        {/* Bottom Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#121212]/95 backdrop-blur-lg border-t border-gray-800/80 max-w-md mx-auto px-6 py-2 pb-6">
+        {/* Bottom Navigation: 아이폰 하단 바 영역 여백 보장 */}
+        <nav 
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)' }}
+          className="fixed bottom-0 left-0 right-0 z-40 bg-[#121212]/95 backdrop-blur-lg border-t border-gray-800/80 max-w-md mx-auto px-6 pt-2"
+        >
           <div className="flex justify-around items-center">
             <button
               type="button"
