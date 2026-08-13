@@ -28,8 +28,11 @@ export interface GearItem {
   id: string;
   name: string;
   category: GearCategory;
+  brand?: string;
   purchaseDate?: string;
   price?: number;
   memo?: string;
+  notes?: string;
+  usageCount?: number;
   image?: string;
 }
